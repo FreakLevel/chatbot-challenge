@@ -1,0 +1,11 @@
+.container {
+  padding: 5rem 0;
+  height: -webkit-fill-available;
+}
+
+.chat {
+  border: 1px solid white;
+  width: 80%;
+  margin: 0 auto;
+  height: -webkit-fill-available;
+}
