@@ -1,10 +1,16 @@
-import { useContext } from "react"
-import { ChatContext } from '../../contexts/chatContext'
+import Messages from '@src/components/messages'
+import Editor from '@src/components/editor'
+import './style.css'
 
-export default () => {
-  const { messages } = useContext(ChatContext)
-  const renderMessages = () => (
-    messages.map(message => <p>{message.text}</p>)
+const Chat = () => {
+  return(
+    <div className='container'>
+      <div className='chat'>
+        <Messages/>
+        <Editor />
+      </div>
+    </div>
   )
-  return(renderMessages())
 }
+
+export default Chat

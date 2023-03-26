@@ -4,7 +4,7 @@ import ChatbotChannel from './websocket/chatbotChannel'
 import { useEffect, useReducer, useState } from 'react' 
 import { initialState, reducer } from './reducer'
 import { ChatContext } from './contexts/chatContext'
-import Chat from './components/Chat'
+import Chat from './components/chat'
 
 function App() {
   const [loading, setLoading] = useState(false)
