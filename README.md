@@ -1,5 +1,7 @@
 # Chatbot Challenge
 
+![CleanShot 2023-03-27 at 08 32 29](https://user-images.githubusercontent.com/29663603/227929890-b4ca76cd-600a-4955-8510-f8e0f1587b39.png)
+
 ## Problem
 
 This project was focused on creating a chatbot that should respond to 3 different options:
@@ -75,6 +77,12 @@ The project has a docker compose's file to run it as production and without the 
 
 Just `docker-compose build` and `docker-compose up`, wait until all is ready and you can go to the frontend port to see the project running.
 
+## Test data
+
+Clients rut:
+- 6072870-4
+- 6943021-K
+
 ## Improvements
 
 The project has a lot of improvements to realize, but some of what I wanted to add but for the time wasn't possible.
@@ -84,4 +92,5 @@ The project has a lot of improvements to realize, but some of what I wanted to a
 - Add an API to create/delete/modify information in the database.
 - Add a validation system for the bot paths.
 - Add the posibility to send links with files/images through the messages in markdown.
-
+- Add CI/CD
+- Deploy in a SaaS
