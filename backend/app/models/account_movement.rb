@@ -37,5 +37,10 @@ class AccountMovement < ApplicationRecord
     end.round(numbers_round)
   }
 
-  before_save { self.amount = amount.to_f.round(2) }
+  before_save :add_attributes
+
+  def add_attributes
+    self.amount = amount.to_f.round(2)
+    self.identifier = SecureRandom.uuid
+  end
 end
