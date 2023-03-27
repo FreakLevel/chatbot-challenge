@@ -1,0 +1,11 @@
+development:
+  POSTGRES_HOST: 'localhost'
+  POSTGRES_PORT: '5432'
+  POSTGRES_USER: 'postgres'
+  POSTGRES_PASSWORD: 'postgres'
+  POSTGRES_DATABASE: 'chatbot-challenge'
+test:
+  POSTGRES_HOST: 'localhost'
+  POSTGRES_PORT: '5432'
+  POSTGRES_PASSWORD: 'postgres'
+  POSTGRES_DATABASE: 'chatbot-challenge-test'
