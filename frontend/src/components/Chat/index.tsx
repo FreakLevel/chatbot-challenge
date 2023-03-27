@@ -6,7 +6,13 @@ import cable from "@src/websocket/cable"
 import { ChatChannel } from "@src/websocket/chatbotChannel"
 import { useAtom } from "jotai"
 import { chatStore } from "@src/stores/store"
-import { IMessage } from '@src/reducer'
+
+export interface IMessage {
+  key: string,
+  from: 'bot' | 'human',
+  text: string,
+  input: string | null
+}
 
 const Chat = () => {
   const [editorAvailable, setEditorAvailable] = useState<boolean>(false)
