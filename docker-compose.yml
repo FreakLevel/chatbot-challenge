@@ -1,0 +1,160 @@
+x-app: &app
+  build:
+    context: .
+    args:
+      RUBY_VERSION: '3.2.1'
+      PG_MAJOR: '15'
+      NODE_MAJOR: '18'
+  environment: &env
+    NODE_ENV: production
+    RAILS_ENV: production
+  tmpfs:
+    - /tmp
+    - /app/tmp/pids
+
+x-forntend: &frontend
+  <<: *app
+  build:
+    dockerfile: ./frontend/Dockerfile
+  stdin_open: true
+  tty: true
+  volumes:
+    - node_modules:/app/node_modules
+
+x-backend: &backend
+  <<: *app
+  build:
+    dockerfile: ./backend/Dockerfile
+  stdin_open: true
+  tty: true
+  volumes:
+    - ./backend/:/app:cached
+    - rails_cache:/app/tmp/cache
+    - bundle:/usr/local/bundle
+    - history:/usr/local/hist
+    - .psqlrc:/root/.psqlrc:ro
+  environment: &backend_environment
+    <<: *env
+    REDIS_URL: redis://redis:6379/
+    DATABASE_URL: postgres://postgres:postgres@chatbot:5432
+    WEB_CONCURRENCY: 1
+    HISTFILE: /usr/local/hist/.bash_history
+    PSQL_HISTFILE: /usr/local/hist/.psql_history
+    IRB_HISTFILE: /usr/local/hist/.irb_history
+    ACTION_CABLE_ADAPTER: ${ACTION_CABLE_ADAPTER:-anycable}
+    ANYCABLE_RPC_HOST: 0.0.0.0:50051
+    ANYCABLE_BROADCAST_ADAPTER: redis
+    EDITOR: vi
+    LOG: ${LOG:-0}
+  depends_on: &backend_depends_on
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+
+services:
+  web:
+    <<: *backend
+    command: bundle exec rails server -b 0.0.0.0
+    ports:
+      - '3000:3000'
+    environment:
+      RUN_MIGRATIONS: true
+      RAILS_ENV: production
+      REDIS_URL: redis://redis:6379/
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/chatbot
+      WEB_CONCURRENCY: 1
+      HISTFILE: /usr/local/hist/.bash_history
+      PSQL_HISTFILE: /usr/local/hist/.psql_history
+      IRB_HISTFILE: /usr/local/hist/.irb_history
+      ACTION_CABLE_ADAPTER: ${ACTION_CABLE_ADAPTER:-anycable}
+      ANYCABLE_RPC_HOST: 0.0.0.0:50051
+      ANYCABLE_BROADCAST_ADAPTER: redis
+      EDITOR: vi
+      LOG: ${LOG:-0}
+      DISABLE_DATABASE_ENVIRONMENT_CHECK: 1
+    depends_on:
+      <<: *backend_depends_on
+      ws:
+        condition: service_started
+      anycable:
+        condition: service_started
+
+  front:
+    <<: *frontend
+    command: yarn preview
+    ports:
+      - '8000:8000'
+    environment:
+      NODE_ENV: production
+    depends_on:
+      web:
+        condition: service_started
+
+  ws: &ws
+    image: anycable/anycable-go:1.2
+    ports:
+      - '8080:8080'
+    environment: &ws_environment
+      ANYCABLE_HOST: "0.0.0.0"
+      ANYCABLE_PORT: 8080
+      ANYCABLE_REDIS_URL: redis://redis:6379/0
+      ANYCABLE_RPC_HOST: anycable:50051
+      ANYCABLE_DEBUG: ${ANYCABLE_DEBUG:-1}
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/chatbot
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  anycable:
+    <<: *backend
+    command: ./bin/bundle exec anycable
+    environment:
+      <<: *backend_environment
+      ANYCABLE_REDIS_URL: redis://redis:6379/0
+      ANYCABLE_RPC_HOST: 0.0.0.0:50051
+      ANYCABLE_DEBUG: ${ANYCABLE_DEBUG:-1}
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/chatbot
+    ports:
+      - '50051:50051'
+    depends_on:
+      <<: *backend_depends_on
+      ws:
+        condition: service_started
+
+  postgres:
+    image: postgres:15.0
+    volumes:
+      - .psqlrc:/root/.psqlrc:ro
+      - postgres:/var/lib/postgresql/data
+      - history:/user/local/hist
+    environment:
+      POSTGRES_PASSWORD: postgres
+      PSQL_HISTFILE: /user/local/hist/.psql_history
+    ports:
+      - 5432
+    healthcheck:
+      test: pg_isready -U postgres -h 127.0.0.1
+      interval: 5s
+
+  redis:
+    image: redis:6.2-alpine
+    volumes:
+      - redis:/data
+    ports:
+      - 6379
+    healthcheck:
+      test: redis-cli ping
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  postgres:
+  redis:
+  bundle:
+  node_modules:
+  rails_cache:
+  history:
+  assets:
+  assets_builds:
