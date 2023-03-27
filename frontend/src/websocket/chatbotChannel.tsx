@@ -1,9 +1,6 @@
 import { Channel } from "@anycable/web"
 import { ChannelEvents } from "@anycable/core"
 import { Dispatch } from "react"
-import {
-  SET_NEW_MESSAGE
-} from '../actions'
 
 type Params = {}
 type Message = {
@@ -18,9 +15,9 @@ class ChatbotChannel extends Channel<Params, Message, Events> {
 
   dispatch: Dispatch<unknown>
 
-  constructor(dispatch: any) {
+  constructor(addMessage: any) {
     super()
-    this.dispatch = dispatch
+    this.dispatch = addMessage
     return this
   }
 
@@ -31,18 +28,15 @@ class ChatbotChannel extends Channel<Params, Message, Events> {
   async sendMessage(payload: any) {
     this.perform('receive_message', payload)
     this.dispatch({
-      type: SET_NEW_MESSAGE,
-      payload: {
-        key: crypto.randomUUID(),
-        from: 'human',
-        text: payload.value,
-        input: null
-      }
+      key: crypto.randomUUID(),
+      from: 'human',
+      text: payload.value,
+      input: null
     })
   }
 
   receive(message: any) {
-    this.dispatch({ type: SET_NEW_MESSAGE, payload: message.data })
+    this.dispatch(message.data)
   }
 }
 

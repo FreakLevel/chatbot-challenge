@@ -29,11 +29,12 @@ class AccountMovement < ApplicationRecord
   }, _prefix: true
 
   scope :balance_currency, lambda { |currency|
+    numbers_round = currency.eql?(:clp) ? 0 : 2
     where(currency:).inject(0) do |total, movement|
       amount = movement.amount.to_f
       amount *= -1 if movement.expense?
       total + amount
-    end
+    end.round(numbers_round)
   }
 
   before_save { self.amount = amount.to_f.round(2) }

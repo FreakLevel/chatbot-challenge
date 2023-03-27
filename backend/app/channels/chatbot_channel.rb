@@ -23,6 +23,8 @@ class ChatbotChannel < ApplicationCable::Channel
     current_path = BotPath.find_by(initial: true) if current_path.nil?
     if current_path.options
       option = current_path.options[value]
+      return bad_option if option.nil?
+
       next_step = BotPath.find_by(identifier: option)
     else
       Rails.cache.write("#{room}_#{input}", value)
@@ -44,6 +46,11 @@ class ChatbotChannel < ApplicationCable::Channel
     send_messages BotPath.find_by(initial: true).next_step
   end
 
+  def bad_option
+    ChatbotChannel.custom_message(room, '**Error:** _Opción Inválida_', nil)
+    send_messages BotPath.find_by(initial: true).next_step
+  end
+
   def self.send_message(room, path)
     message = path.method_name ? path.send(path.method_name, room) : path.message
     data = {
@@ -51,6 +58,16 @@ class ChatbotChannel < ApplicationCable::Channel
       from: 'bot',
       text: message,
       input: path.input
+    }
+    ActionCable.server.broadcast(room, { type: 'SetNewMessage', data: })
+  end
+
+  def self.custom_message(room, message, input)
+    data = {
+      key: SecureRandom.uuid,
+      from: 'bot',
+      text: message,
+      input:
     }
     ActionCable.server.broadcast(room, { type: 'SetNewMessage', data: })
   end

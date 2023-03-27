@@ -1,18 +1,19 @@
-import { useContext, useEffect, useRef, useState } from "react"
-import { useChat } from '@src/contexts/chatContext'
+import { useEffect, useRef } from "react"
 import './style.css'
+import { ChatChannel } from "../../websocket/chatbotChannel"
 
 interface IProps {
   editorAvailable: boolean,
-  changeEditorAvailable: (available: boolean) => void
+  changeEditorAvailable: (available: boolean) => void,
+  input: string | null,
 }
 const Editor = ({
   editorAvailable,
-  changeEditorAvailable
+  changeEditorAvailable,
+  input,
 }: IProps) => {
   const ref = useRef(null);
-  const [state,] = useChat()
-  const [text, setText] = useState<string>('')
+  const inputRef = useRef(input);
 
   useEffect(() => {
     const keyDownHandler = (event: any) => {
@@ -25,15 +26,22 @@ const Editor = ({
     return () => document.removeEventListener('keydown', keyDownHandler)
   }, [])
 
+  useEffect(() => {
+    inputRef.current = input
+    console.count('Change input')
+    console.log(`Input: ${inputRef.current}`)
+  }, [input])
+
   const sendMessage = () => {
-    const input = state.messages[state.messages.length - 1].input
-    console.log(`Input: ${input}`)
+    const channel = ChatChannel.getInstance(null)
     const message = ref.current.value
     if(message === '') return
     ref.current.value = ''
+    const inputValue = inputRef.current
+    console.log(`Input: ${inputValue}`)
     changeEditorAvailable(false)
-    state.channel.sendMessage({
-      input: input,
+    channel.sendMessage({
+      input: inputValue,
       value: message
     })
   }
@@ -46,8 +54,6 @@ const Editor = ({
         autoFocus
         placeholder="Responde aquí"
         className='messageInput'
-        value={text}
-        onChange={(evt: React.ChangeEvent<HTMLInputElement>) => setText(evt.target.value)}
       />
     </div>
   )

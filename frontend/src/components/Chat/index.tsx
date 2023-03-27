@@ -2,31 +2,47 @@ import Messages from '@src/components/messages'
 import Editor from '@src/components/editor'
 import './style.css'
 import { useCallback, useEffect, useState } from 'react'
-import { useChat } from '../../contexts/chatContext'
+import cable from "@src/websocket/cable"
+import { ChatChannel } from "@src/websocket/chatbotChannel"
+import { useAtom } from "jotai"
+import { chatStore } from "@src/stores/store"
 
-interface IProps {
-  openConnection: (dispatcher: any) => void
-}
-
-const Chat = ({ openConnection }: IProps) => {
+const Chat = () => {
   const [editorAvailable, setEditorAvailable] = useState<boolean>(false)
 
-  const [, dispatch]: any = useChat()
-
-  useEffect(() => {
-    if(dispatch === null || dispatch === undefined) return
-    openConnection(dispatch)
-  }, [dispatch])
-
   const changeEditorAvailable = (value: boolean) => setEditorAvailable(value)
+  
+  const [chat, setChatStore] = useAtom(chatStore)
+  const [initedConversation, setInitedConversation] = useState<boolean>(false)
+  const [lastInputType, setLastInputType] = useState<string|null>(null)
+
+  const addMessage = (message: any) => {
+    setChatStore((chatStore) => ({
+      ...chatStore,
+      messages: chatStore.messages.concat(message),
+      input: message.input
+    }))
+    setLastInputType(message.input)
+  }
+  
+  useEffect(() => {
+    const channel = ChatChannel.getInstance(addMessage)
+    cable.subscribe(channel)
+    channel.ensureSubscribed().then(() => {
+      if(initedConversation) return
+      channel.initConversation()
+      setInitedConversation(true)
+    })
+  }, [])
 
   return(
     <div className='container'>
       <div className='chat'>
-        <Messages changeEditorAvailable={changeEditorAvailable}/>
+        <Messages chat={chat} changeEditorAvailable={changeEditorAvailable}/>
         <Editor
           editorAvailable={editorAvailable}
           changeEditorAvailable={setEditorAvailable}
+          input={chat.input}
         />
       </div>
     </div>

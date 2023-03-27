@@ -35,7 +35,6 @@ export const chatReducer = (state = initialState, action: IAction) => {
     case SET_NEW_MESSAGE:
       return handleNewMessage(state, action.payload)
     case SET_CHANNEL:
-      debugger
       return { ...state, channel: action.channel }
     default:
       throw Error(`Unknow action: ${action.type}`);
