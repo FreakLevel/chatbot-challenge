@@ -1,11 +1,12 @@
 import Messages from '@src/components/messages'
 import Editor from '@src/components/editor'
 import './style.css'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import cable from "@src/websocket/cable"
 import { ChatChannel } from "@src/websocket/chatbotChannel"
 import { useAtom } from "jotai"
 import { chatStore } from "@src/stores/store"
+import { IMessage } from '@src/reducer'
 
 const Chat = () => {
   const [editorAvailable, setEditorAvailable] = useState<boolean>(false)
@@ -14,15 +15,13 @@ const Chat = () => {
   
   const [chat, setChatStore] = useAtom(chatStore)
   const [initedConversation, setInitedConversation] = useState<boolean>(false)
-  const [lastInputType, setLastInputType] = useState<string|null>(null)
 
-  const addMessage = (message: any) => {
-    setChatStore((chatStore) => ({
+  const addMessage = (message: IMessage) => {
+    setChatStore((chatStore: any) => ({
       ...chatStore,
       messages: chatStore.messages.concat(message),
       input: message.input
     }))
-    setLastInputType(message.input)
   }
   
   useEffect(() => {

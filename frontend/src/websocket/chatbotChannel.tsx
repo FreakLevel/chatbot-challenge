@@ -6,9 +6,7 @@ type Params = {}
 type Message = {
   type: 'message'
 }
-interface Events extends ChannelEvents<Message> {
-  typing: (msg: Message) => void
-}
+interface Events extends ChannelEvents<Message> {}
 
 class ChatbotChannel extends Channel<Params, Message, Events> {
   static identifier = 'ChatbotChannel'
@@ -41,17 +39,17 @@ class ChatbotChannel extends Channel<Params, Message, Events> {
 }
 
 export const ChatChannel = (function () {
-    var instance;
+    var instance: any;
 
     function createInstance(dispatcher: any) {
-      var channel = new ChatbotChannel(dispatcher)
-      return channel
+      return new ChatbotChannel(dispatcher)
     }
 
     return {
-      getInstance: function (dispatcher: any) {
+      getInstance: function (dispatcher: any = null) {
         if (!instance) {
-            instance = createInstance(dispatcher)
+          if (dispatcher === null) { throw Error('Can not initialize without dispatcher') }
+          instance = createInstance(dispatcher)
         }
         return instance
       }

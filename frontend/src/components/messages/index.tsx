@@ -9,7 +9,7 @@ interface IProps {
 }
 
 const Messages =  ({ changeEditorAvailable, chat } :IProps) => {
-  const dummy = useRef(null)
+  const dummy = useRef<HTMLDivElement|null>(null)
 
   useEffect(() => {
     if (dummy.current) {

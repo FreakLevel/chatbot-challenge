@@ -8,10 +8,11 @@ interface IChatContext {
 
 export const initialState: IChatContext = {
   messages: [],
-  channel: null
+  channel: null,
+  input: null
 }
 
-interface IMessage {
+export interface IMessage {
   key: string,
   from: 'bot' | 'human',
   text: string,
@@ -47,7 +48,7 @@ const handleNewMessage = (
 ) => {
   const sameMessageIndex = currentState.messages
     .findIndex(
-      message => message.key == payload.key
+      message => message.key == payload!.key
     )
   const messages = currentState.messages
   if(sameMessageIndex >= 0) return currentState
