@@ -1,21 +1,43 @@
-import { SET_NEW_MESSAGE } from './actions'
-import { IChatContext } from './contexts/chatContext'
+import { SET_CHANNEL, SET_NEW_MESSAGE } from "./actions"
 
-interface IAction {
-  type: string
-  payload: any
+interface IChatContext {
+  messages: any[],
+  channel: any,
+  input: string | null
 }
 
 export const initialState: IChatContext = {
-  messages: []
+  messages: [],
+  channel: null
 }
 
-export const reducer: any = (oldState: IChatContext, action: IAction) => {
-  switch (action.type) {
+interface IMessage {
+  key: string,
+  from: 'bot' | 'human',
+  text: string,
+  input: string | null
+}
+
+export const addNewMessage = (message: IMessage) => ({
+  type: SET_NEW_MESSAGE,
+  message
+})
+
+export interface IAction {
+  type: string,
+  payload?: IMessage,
+  channel?: any
+}
+
+export const chatReducer = (state = initialState, action: IAction) => {
+  if(action === null || action === undefined) return state
+  switch(action.type) {
     case SET_NEW_MESSAGE:
-      return handleNewMessage(oldState, action.payload)
+      return handleNewMessage(state, action.payload)
+    case SET_CHANNEL:
+      return { ...state, channel: action.channel }
     default:
-      throw "Unhandled server message";
+      throw Error(`Unknow action: ${action.type}`);
   }
 }
 
@@ -28,10 +50,10 @@ const handleNewMessage = (
       message => message.key == payload.key
     )
   const messages = currentState.messages
-  if(sameMessageIndex < 0) messages.push(payload)
+  if(sameMessageIndex >= 0) return currentState
+  messages.push(payload)
   return {
     ...currentState,
     messages: messages
   }
 }
-

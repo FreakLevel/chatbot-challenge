@@ -8,6 +8,6 @@ class CreateAccounts < ActiveRecord::Migration[7.0]
       t.timestamps
     end
     add_index :accounts, :account_number, unique: true
-    add_reference :accounts, :clients, null: false, index: { unique: true }
+    add_reference :accounts, :client, null: false, index: { unique: true }
   end
 end
