@@ -52,4 +52,40 @@ class BotPath < ApplicationRecord
       final_message + "\n|#{indicators[indicator][:code]}|#{indicators[indicator][:value]}|"
     end
   end
+
+  def print_order_detail(room)
+    rut = Rails.cache.read("#{room}_rut")
+    address = Rails.cache.read("#{room}_address")
+    quantity = Rails.cache.read("#{room}_quantity")
+    "**Resumen de compra**\n
+- Rut Cliente: #{rut}\n
+- Dirección de entrega: #{address}\n
+- Cantidad: #{quantity} x $700 CLP c/u\n
+**Total:** _$#{quantity.to_i * 700} CLP_"
+  end
+
+  def create_order(room)
+    rut = Rails.cache.read("#{room}_rut")
+    client = Client.find_by(rut:)
+    return "**Error:** _Cliente con rut #{rut} no se encuentra registrado_" if client.nil?
+
+    address = Rails.cache.read("#{room}_address")
+    quantity = Rails.cache.read("#{room}_quantity")
+    total = quantity.to_i * 700
+    if client.account.payable < total
+      return '**Error:** _No posee saldo suficiente en su cuenta para realizar la compra_'
+    end
+
+    movement = client.account.account_movements.new
+    movement.movement_type = :expense
+    movement.currency = :clp
+    movement.amount = total
+    movement.description = "Compra #{quantity} rollos de papel - Dirección: #{address}"
+    date = DateTime.now.midnight + 1.day
+    movement.created_at = date
+    movement.updated_at = date
+    movement.save!
+    "## ¡Tu orden ha sido creada con éxito!\n
+__El total de la compra será descontado de tu saldo de mañana__"
+  end
 end
