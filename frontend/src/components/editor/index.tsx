@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react"
 import './style.css'
-import { ChatChannel } from "../../websocket/chatbotChannel"
+import { ChatChannel } from "@src/websocket/chatbotChannel"
 
 interface IProps {
   editorAvailable: boolean,
@@ -12,8 +12,8 @@ const Editor = ({
   changeEditorAvailable,
   input,
 }: IProps) => {
-  const ref = useRef(null);
-  const inputRef = useRef(input);
+  const ref = useRef<HTMLInputElement|null>(null);
+  const inputRef = useRef<string|null>(input);
 
   useEffect(() => {
     const keyDownHandler = (event: any) => {
@@ -28,17 +28,15 @@ const Editor = ({
 
   useEffect(() => {
     inputRef.current = input
-    console.count('Change input')
-    console.log(`Input: ${inputRef.current}`)
   }, [input])
 
   const sendMessage = () => {
-    const channel = ChatChannel.getInstance(null)
+    if(ref.current === null) return
+    const channel = ChatChannel.getInstance()
     const message = ref.current.value
     if(message === '') return
     ref.current.value = ''
     const inputValue = inputRef.current
-    console.log(`Input: ${inputValue}`)
     changeEditorAvailable(false)
     channel.sendMessage({
       input: inputValue,
