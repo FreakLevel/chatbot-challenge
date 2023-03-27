@@ -1,36 +1,34 @@
+import { useEffect, useState } from 'react'
 import './App.css'
-import cable from './websocket/cable'
-import ChatbotChannel from './websocket/chatbotChannel'
-import { useEffect, useReducer, useState } from 'react' 
-import { initialState, reducer } from './reducer'
-import { ChatContext } from './contexts/chatContext'
 import Chat from './components/chat'
+import cable from './websocket/cable'
+import { ChatChannel } from './websocket/chatbotChannel'
+import { ChatContextProvider } from './contexts/chatContext'
+import { chatReducer, initialState } from './reducer'
+import { SET_CHANNEL } from './actions'
 
 function App() {
-  const [loading, setLoading] = useState(false)
-  ChatContext.displayName = 'ChatContext'
+  const [initedConversation, setInitedConversation] = useState<boolean>(false)
 
-  const [state, dispatch] = useReducer(reducer, initialState)
-
-  useEffect(() => {
-    const channel = new ChatbotChannel(dispatch)
+  const connectChannel = (dispatcher: any) => {
+    if(dispatcher === null || dispatcher === undefined) return
+    const channel = ChatChannel.getInstance(dispatcher)
     cable.subscribe(channel)
-    setLoading(true)
-    channel.ensureSubscribed().then(
-      () => setLoading(false)
-    )
-    channel.test()
-  }, [])
+    if(initedConversation) return
+    dispatcher({ type: SET_CHANNEL, channel: channel })
+    channel.ensureSubscribed().then(() => {
+      setInitedConversation(true)
+      channel.initConversation()
+    })
+  }
+
+  useEffect(() => console.count('Render App'))
 
   return (
     <div className="App">
-      <ChatContext.Provider value={state as any}>
-        {
-          loading
-            ? <h1>Loading</h1>
-            : <Chat />
-        } 
-      </ChatContext.Provider>
+      <ChatContextProvider initialState={initialState} reducer={chatReducer}>
+        <Chat openConnection={connectChannel} />
+      </ChatContextProvider>
     </div>
   )
 }

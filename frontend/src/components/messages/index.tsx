@@ -1,20 +1,27 @@
-import { useContext, useEffect, useRef } from "react"
-import { ChatContext } from '@src/contexts/chatContext'
+import { useEffect, useRef } from "react"
+import { useChat } from '@src/contexts/chatContext'
 import ReactMarkdown from 'react-markdown'
 import './style.css'
 
-const Messages =  () => {
-  const { messages } = useContext<ChatContext>(ChatContext)
+interface IProps {
+  changeEditorAvailable: (available: boolean) => void
+}
+
+const Messages =  ({ changeEditorAvailable } :IProps) => {
+  const [state,] = useChat()
   const dummy = useRef(null)
 
   useEffect(() => {
     if (dummy.current) {
       dummy.current.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [messages.length])
+    if (state.messages.length <= 0) return
+    const message = state.messages[state.messages.length - 1]
+    if (message.input !== null) changeEditorAvailable(true)
+  }, [state.messages.length])
 
   const renderMessages = () => (
-    messages.map((message: any) => {
+    state.messages.map((message: any) => {
       const cssClasses = `message ${message.from}Message`
       const key = `message-${message.key}`
       return(

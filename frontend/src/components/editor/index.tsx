@@ -1,13 +1,22 @@
-import { useEffect, useRef, useState } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
+import { useChat } from '@src/contexts/chatContext'
 import './style.css'
 
-const Editor = () => {
+interface IProps {
+  editorAvailable: boolean,
+  changeEditorAvailable: (available: boolean) => void
+}
+const Editor = ({
+  editorAvailable,
+  changeEditorAvailable
+}: IProps) => {
   const ref = useRef(null);
+  const [state,] = useChat()
+  const [text, setText] = useState<string>('')
 
   useEffect(() => {
-    if (!document.activeElement === ref.current) return
     const keyDownHandler = (event: any) => {
-      if(event.key === 'Enter') {
+      if(event.key === 'Enter' && document.activeElement === ref.current) {
         event.preventDefault()
         sendMessage()
       }
@@ -17,19 +26,28 @@ const Editor = () => {
   }, [])
 
   const sendMessage = () => {
+    const input = state.messages[state.messages.length - 1].input
+    console.log(`Input: ${input}`)
     const message = ref.current.value
     if(message === '') return
     ref.current.value = ''
-    console.log(message)
+    changeEditorAvailable(false)
+    state.channel.sendMessage({
+      input: input,
+      value: message
+    })
   }
 
   return(
     <div className="editorContainer">
       <input
+        readOnly={!editorAvailable}
         ref={ref}
         autoFocus
         placeholder="Responde aquí"
         className='messageInput'
+        value={text}
+        onChange={(evt: React.ChangeEvent<HTMLInputElement>) => setText(evt.target.value)}
       />
     </div>
   )
