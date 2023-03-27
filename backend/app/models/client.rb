@@ -12,4 +12,6 @@
 #
 class Client < ApplicationRecord
   has_one :account, dependent: :destroy
+
+  after_create { create_account }
 end

@@ -11,6 +11,6 @@ class CreateAccountMovements < ActiveRecord::Migration[7.0]
       t.timestamps
     end
     add_index :account_movements, :identifier, unique: true
-    add_reference :account_movements, :accounts, null: false, index: { unique: true }
+    add_reference :account_movements, :account, null: false
   end
 end

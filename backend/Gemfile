@@ -47,7 +47,11 @@ gem 'bootsnap', require: false
 gem 'anycable-rails', '~> 1.1'
 
 # when using Redis broadcast adapter
+gem 'hiredis', '~> 0.6.1'
 gem 'redis', '>= 4.0'
+
+# Api calls
+gem 'rest-client', '~> 2.1'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

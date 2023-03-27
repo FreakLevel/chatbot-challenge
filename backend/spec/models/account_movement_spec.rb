@@ -6,13 +6,13 @@
 #
 #  id            :bigint           not null, primary key
 #  identifier    :string           not null
-#  movement_type :integer          default(0), not null
+#  movement_type :integer          default("expense"), not null
 #  amount        :float            default(0.0), not null
-#  currency      :integer          default(0), not null
+#  currency      :integer          default("clp"), not null
 #  description   :string           default(""), not null
 #  created_at    :datetime         not null
 #  updated_at    :datetime         not null
-#  accounts_id   :bigint           not null
+#  account_id    :bigint           not null
 #
 require 'rails_helper'
 

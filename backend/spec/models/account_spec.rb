@@ -6,9 +6,10 @@
 #
 #  id             :bigint           not null, primary key
 #  account_number :string           not null
+#  last_deposit   :datetime
 #  created_at     :datetime         not null
 #  updated_at     :datetime         not null
-#  clients_id     :bigint           not null
+#  client_id      :bigint           not null
 #
 require 'rails_helper'
 
